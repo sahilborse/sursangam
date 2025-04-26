@@ -1,0 +1,17 @@
+# Environment files
+**/.env*
+
+# Node modules
+**/node_modules/
+
+# OS/IDE-specific
+.DS_Store
+*.log
+*.lock
+*.cache
+*.swp
+.idea/
+.vscode/
+
+# Model output (if needed)
+musicModel/flute/
