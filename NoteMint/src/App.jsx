@@ -23,8 +23,12 @@ function App() {
     <MyState>
       <Router>
         <Routes>
-        <Route path="/" element={<Signup />} />
-          <Route path="/home" element={<Home />} />
+        {/* <Route path="/signup" element={<Signup />} /> */}
+          <Route path="/" element={
+            <ProtectedRoute>
+              <Home />
+            </ProtectedRoute>
+            } />
           <Route path="/order" element={
             <ProtectedRoute>
               <Order />
@@ -61,7 +65,7 @@ function App() {
 export default App
 //user
 export const ProtectedRoute = ({ children }) => {
-  if (localStorage.getItem('user')) {
+  if (localStorage.getItem('userId')) {
     return children
   }
   else {
@@ -70,8 +74,8 @@ export const ProtectedRoute = ({ children }) => {
 }
 //admin 
 export const ProtectedRouteForAdmin = ({children}) => {
-  const admin = JSON.parse(localStorage.getItem('user'))
-  console.log(admin.user.email)
+  const admin = JSON.parse(localStorage.getItem('userId'))
+  // console.log(admin.user.email)
   if (admin.user.email === 'hometest@gmail.com') {
     return children
   }

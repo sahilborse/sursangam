@@ -2,6 +2,7 @@ import { useContext, useState } from 'react';
 import { Link } from 'react-router-dom'
 import myContext from '../../context/data/myContext';
 import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth, fireDB } from '../../firebase/FirebaseConfig';
 import { Timestamp, addDoc, collection } from 'firebase/firestore';
@@ -11,7 +12,7 @@ function Signup() {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-
+    const navigate = useNavigate(); 
     const context = useContext(myContext);
     const { loading, setLoading } = context;
 
@@ -24,7 +25,7 @@ function Signup() {
         try {
             const users = await createUserWithEmailAndPassword(auth, email, password);
 
-            // console.log(users)
+          
 
             const user = {
                 name: name,
@@ -35,6 +36,8 @@ function Signup() {
             const userRef = collection(fireDB, "users")
             await addDoc(userRef, user);
             toast.success("Signup Succesfully")
+            localStorage.setItem("userId", JSON.stringify(user));
+            navigate('/');
             setName("");
             setEmail("");
             setPassword("");

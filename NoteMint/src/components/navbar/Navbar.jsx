@@ -14,16 +14,14 @@ export default function Navbar() {
   const context = useContext(myContext)
   const { mode,toggleMode  } = context
 
-  const user = JSON.parse(localStorage.getItem('user'))
+  const user = JSON.parse(localStorage.getItem('userId'))
   console.log(user.user.email)
   const admin = JSON.parse(localStorage.getItem('admin'))
  
 
   const logout = () => {
-    localStorage.clear('currentUser')
-    // localStorage.clear('currentAdmin');
+    localStorage.clear('userId')
     window.location.href = "/login"
-    // navigate('/login');
   }
 
   const cartItems = useSelector((state) => state.cart)

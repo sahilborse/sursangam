@@ -17,4 +17,21 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const fireDB = getFirestore(app);
 const auth = getAuth(app)
+
+const checkUserExists = async (userId) => {
+  const dbRef = ref(db);
+  try {
+    const snapshot = await get(child(dbRef, `users/${userId}`));
+    if (snapshot.exists()) {
+      console.log("User exists:", snapshot.val());
+      return true;
+    } else {
+      console.log("No such user.");
+      return false;
+    }
+  } catch (error) {
+    console.error("Error checking user:", error);
+    return false;
+  }
+};
 export {fireDB,auth } ; 
