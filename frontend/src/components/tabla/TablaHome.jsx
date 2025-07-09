@@ -7,7 +7,7 @@ import tinImage from "../../assets/tin.png";
 import geImage from "../../assets/ge.png";
 import dhaImage from "../../assets/dha.png";
 import keImage from "../../assets/ke.png";
-import dheImage from "../../assets/thun.png";
+import dheImage from "../../assets/Thun.png";
 import takImage from "../../assets/tak.png";
 
 export default function TablaLearning() {
