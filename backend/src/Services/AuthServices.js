@@ -1,89 +1,96 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const {pool} = require('../model/database'); // Import MySQL connection
+const { pool } = require('../model/database'); // Using your mysql2/promise pool
 require('dotenv').config();
 
 class AuthService {
-    /**
-     * Register a new user
-     */
-    static async register(userData) {
-        return new Promise((resolve, reject) => {
-            const { username, email, password } = userData;
+  /**
+   * ✅ Register a new user
+   */
+  static async register({ username, email, password }) {
+    try {
+      if (!username || !email || !password) {
+        throw new Error('Invalid input');
+      }
 
-            
-            // console.log(email, password, username);
-            if(!email || !password || !username) return reject(new Error('Invalid input'));
-            try {
-                // Check if user already exists
-                    const checkUserQuery = 'SELECT * FROM users WHERE email = $1';
-                    pool.query(checkUserQuery, [email], async (err, results) => {
-                    if (err) return reject(new Error('Database error'));
-                    if (results.rows.length > 0) return reject(new Error('User already exists'));
+      // Check if user already exists
+      console.log(username, email, password);
+      const [existingUser] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
+      if (existingUser.length > 0) {
+        throw new Error('User already exists');
+      }
 
-                    // Hash the password
-                    const saltRounds = 10;
-                    const hashedPassword = await bcrypt.hash(password, saltRounds);
+      // Hash the password
+      const hashedPassword = await bcrypt.hash(password, 10);
 
-                    // Insert new user
-                    const insertQuery = 'INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING id';
-                    pool.query(insertQuery, [username, email, hashedPassword], (err, result) => {
-                        if (err) return reject(new Error('Failed to register user'));
-                        resolve({ message: 'User registered successfully', userId: result.rows[0].id });
-                    });
-                });
-            }
-            catch (error) {
-                console.error(error);
-                return reject(new Error('Failed to register user'));
-            }
-        });
+      // Insert user
+      const [result] = await pool.query(
+        'INSERT INTO users (name, email, password) VALUES (?, ?, ?)',
+        [username, email, hashedPassword]
+      );
+
+      return {
+        message: 'User registered successfully',
+        userId: result.insertId,
+      };
+    } catch (error) {
+      console.error('❌ Register Error:', error.message);
+      throw new Error(error.message || 'Failed to register user');
     }
+  }
 
-    /**
-     * Login a user and return a JWT token
-     */
-        static async login(userData) {
-            return new Promise((resolve, reject) => {
-                const { email, password } = userData;
+  /**
+   * ✅ Login a user and return a JWT token
+   */
+  static async login({ email, password }) {
+    try {
+      if (!email || !password) {
+        throw new Error('Invalid input');
+      }
 
-                // Find user in the database
-                const findUserQuery = 'SELECT * FROM users WHERE email = $1';
-                pool.query(findUserQuery, [email], async (err, results) => {
-                    if (err) return reject(new Error('Database error'));
-                    if (results.rows.length === 0) return reject(new Error('User not found'));
+      // Find user
+      const [users] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
+      if (users.length === 0) {
+        throw new Error('User not found');
+      }
 
-                    const user = results.rows[0];
-                    try {
-                    // Compare passwords
-                        const isMatch = await bcrypt.compare(password, user.password);
-                        if (!isMatch) return reject(new Error('Invalid credentials'));
+      const user = users[0];
 
-                        // Generate JWT token
-                        const token = jwt.sign(
-                            { id: user.id, email: user.email },
-                            process.env.JWT_SECRET,
-                            { expiresIn: '1h' }
-                        );
-                        
-                        resolve({ message: 'Login successful', token, userId:user.id });
-                    } catch (error) {
-                        console.error(error);
-                        return reject(new Error('Failed to login'));
-                    }
-                });
-            });
-        }
+      // Compare passwords
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch) {
+        throw new Error('Invalid credentials');
+      }
 
-    /**
-     * Logout function (Session-based, for API it can be token invalidation)
-     */
-    static async logout(user) {
-        return new Promise((resolve) => {
-            // Invalidate token manually (for example, add token to a blacklist)
-            resolve({ message: 'Logged out successfully' });
-        });
+      // Ensure JWT secret is defined
+      if (!process.env.JWT_SECRET) {
+        throw new Error('JWT secret not defined in environment variables');
+      }
+
+      // Generate JWT
+      const token = jwt.sign(
+        { id: user.id, email: user.email },
+        process.env.JWT_SECRET,
+        { expiresIn: process.env.JWT_EXPIRES_IN || '1h' }
+      );
+
+      return {
+        message: 'Login successful',
+        token,
+        userId: user.id,
+      };
+    } catch (error) {
+      console.error('❌ Login Error:', error.message);
+      throw new Error(error.message || 'Failed to login');
     }
+  }
+
+  /**
+   * ✅ Logout (JWT-based systems just remove token client-side)
+   */
+  static async logout() {
+    return { message: 'Logged out successfully' };
+  }
 }
 
 module.exports = AuthService;

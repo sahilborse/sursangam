@@ -1,5 +1,6 @@
 const express = require('express');
-const InstrumentService = require('../services/instrumentService');
+const InstrumentService = require('../Services/InstrumentService');
+
 
 const router = express.Router();
 
@@ -17,8 +18,10 @@ class InstrumentController {
     static async getInstruments(req, res) {
         const { userId } = req.params;
         const {instrument}  = req.query;
+      
         try {
             const data = await InstrumentService.getInstrumentData({userId,instrument});
+            console.log("Fetching instruments for user: in controller", userId, "instrument:", instrument);
             if (!data) {
                 return res.status(404).json({ message: 'User not found' });
             }

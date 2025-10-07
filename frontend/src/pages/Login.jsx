@@ -13,7 +13,9 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      console.log("called login");
       const { data } = await axiosInstance.post("/auth/login", formData);
+      console.log(data);
       localStorage.setItem("token", data.token.token);
       localStorage.setItem("user", JSON.stringify(data.token.userId));  
   

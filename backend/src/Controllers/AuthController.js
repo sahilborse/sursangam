@@ -8,8 +8,10 @@ class AuthController {
        
         try {
             const user = await AuthService.register(req.body);
+            console.log("users",user);
             res.status(201).json(user);
         } catch (error) {
+            console.log(error);
             res.status(400).json({ error: error.message });
         }
     }
@@ -17,7 +19,9 @@ class AuthController {
     static async login(req, res) {
         
         try {
+            console.log("req.body",req.body);
             const token = await AuthService.login(req.body);
+            console.log("token",token);
             res.status(200).json({ token });
         } catch (error) {
             // console.log(error);

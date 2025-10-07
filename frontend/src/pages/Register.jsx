@@ -13,10 +13,11 @@ export default function Register() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(formData);
+    // console.log(formData);
     try {
       await axiosInstance.post("/auth/register", formData);
-      // alert("User registered successfully!");
+      
+      alert("User registered successfully!");
       window.location.href = "/login";
       // navigate('/login');
     } catch (error) {

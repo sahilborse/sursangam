@@ -12,7 +12,8 @@ const Progress = () => {
       .get(`http://localhost:5000/practice/progress/${userId}`)
       .then((response) => {
         console.log(response.data);
-        setProgressData(response.data);
+        setProgressData(response.data.data);
+        console.log("Progress Data:", response.data.data);
         setLoading(false);
       })
       .catch((error) => {
